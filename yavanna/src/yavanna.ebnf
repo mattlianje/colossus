@@ -1,0 +1,47 @@
+(* Definition of the Yavanna programming language syntax *)
+
+program = { function_definition | comment };
+
+function_definition = "func", identifier, "(", [ parameter_list ], ")", [ "->", type ], compound_statement;
+parameter_list = parameter { ",", parameter };
+parameter = identifier, ":", type;
+type = "int" | "float" | "str";
+identifier = letter, { letter | digit };
+compound_statement = "{", { statement }, "}";
+statement = variable_declaration | expression_statement | control_structure | compound_statement | comment;
+variable_declaration = type, identifier, [ "=", expression ], ";";
+expression_statement = expression, ";";
+control_structure = if_statement | while_statement | for_statement;
+if_statement = "if", "(", expression, ")", statement;
+while_statement = "while", "(", expression, ")", statement;
+for_statement = "for", "(", loop_initialization, expression, ";", expression, ")", statement;
+loop_initialization = identifier, "=", expression, ";";
+
+(* Expressions and Operators *)
+expression = assignment_expression | comparison_expression | arithmetic_expression | primary_expression;
+assignment_expression = identifier, "=", expression;
+comparison_expression = expression, comparison_operator, expression;
+arithmetic_expression = expression, arithmetic_operator, expression;
+primary_expression = identifier | number | string_literal | "(", expression, ")";
+comparison_operator = "==" | "!=" | ">" | "<" | ">=" | "<=";
+arithmetic_operator = "+" | "-" | "*" | "/" | "%";
+
+number = digit, { digit };
+string_literal = '"', { character }, '"';
+
+(* Lexical Elements *)
+letter = "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" |
+         "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" |
+         "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" |
+         "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z";
+digit = "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9";
+character = letter | digit | symbol | whitespace;
+symbol = "." | "," | ";" | ":" | "!" | "?" | "\"" | "'" | "-" | "_" | "(" | ")" |
+         "[" | "]" | "{" | "}" | "&" | "*" | "^" | "%" | "$" | "#" | "@" | "<" | ">" |
+         "/" | "\\" | "|";
+whitespace = " " | "\t" | "\n" | "\r";
+
+(* Comments: single-line and multi-line *)
+comment = single_line_comment | multi_line_comment;
+single_line_comment = "//", { character - newline }, newline;
+multi_line_comment = "/*", { character | newline }, "*/";

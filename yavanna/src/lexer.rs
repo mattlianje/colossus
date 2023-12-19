@@ -13,65 +13,50 @@ pub enum Token {
     Punctuation(String),
     Whitespace(String),
     Comment(String),
+    Type(String),
 }
 
-pub fn lex_c_code(input: &str) -> VecDeque<Token> {
+pub fn lex_yavanna_code(input: &str) -> VecDeque<Token> {
     let mut tokens = VecDeque::new();
 
     let token_patterns: &[(&str, fn(String) -> Token)] = &[
+        // Keywords
         (
             &[
-                r"\bint\b",
+                r"\bfunc\b",
                 r"\breturn\b",
                 r"\bif\b",
                 r"\bwhile\b",
                 r"\bfor\b",
-                r"\bvoid\b",
-                r"\bauto\b",
-                r"\bbreak\b",
-                r"\bcase\b",
-                r"\bchar\b",
-                r"\bconst\b",
-                r"\bcontinue\b",
-                r"\bdefault\b",
-                r"\bdo\b",
-                r"\bdouble\b",
                 r"\belse\b",
-                r"\benum\b",
-                r"\bextern\b",
-                r"\bfloat\b",
-                r"\bgoto\b",
-                r"\blong\b",
-                r"\bregister\b",
-                r"\bshort\b",
-                r"\bsigned\b",
-                r"\bsizeof\b",
-                r"\bstatic\b",
-                r"\bstruct\b",
-                r"\bswitch\b",
-                r"\btypedef\b",
-                r"\bunion\b",
-                r"\bunsigned\b",
-                r"\bvolatile\b",
-                r"\bwhile\b",
             ]
-            .join("|"),
+                .join("|"),
             |s| Token::Keyword(s),
         ),
+        // Type Keywords
+        (r"\bint\b|\bfloat\b|\bstr\b", |s| Token::Type(s)),
+        // Identifier
         (r"[a-zA-Z_][a-zA-Z0-9_]*", |s| Token::Identifier(s)),
+        // Number
         (r"\d+", |s| Token::Number(s)),
+        // String Literal
         (r#"\"(\\.|[^"\\])*\""#, |s| Token::StringLiteral(s)),
-        (r"\+|-|==|!=|>|<|>=|<=|&&|\|\||=", |s| Token::Operator(s)),
-        // Can be multiplication or pointer dereference
-        (r"\*", |s| Token::Operator(s)),
-        // Can be address operator or bitwise AND
-        (r"&", |s| Token::Operator(s)),
+        // Operators
+        (r"\+|-|==|!=|>|<|>=|<=|&&|\|\||=|\+=", |s| Token::Operator(s)),
+        // Return type arrow
+        (r"->", |s| Token::Operator(s)),
+        // Punctuation
         (r"[\(\){};,]", |s| Token::Punctuation(s)),
-        // Array brackets
-        (r"\[|\]", |s| Token::Punctuation(s)),
+        // Type annotation colon
+        (r":", |s| Token::Punctuation(s)),
+        // Whitespace
         (r"[\s]+", |s| Token::Whitespace(s)),
+        // Single-line comment
         (r"//.*", |s| Token::Comment(s)),
+        // Multi-line comment
+        (r"/\*[\s\S]*?\*/", |s| Token::Comment(s)),
     ];
+
 
     let mut remaining = input;
 
@@ -81,7 +66,6 @@ pub fn lex_c_code(input: &str) -> VecDeque<Token> {
         for &(pattern, token_ctor) in token_patterns {
             let re = Regex::new(pattern).unwrap();
             if let Some(mat) = re.find(remaining) {
-                // matches must start at current pos (sliding style)
                 if mat.start() == 0 {
                     if max_match.is_none() || mat.end() > max_match.unwrap().0 {
                         max_match = Some((mat.end(), token_ctor));
@@ -102,20 +86,21 @@ pub fn lex_c_code(input: &str) -> VecDeque<Token> {
     tokens
 }
 
+
 #[cfg(test)]
 mod lexer_tests {
     use super::*;
 
     #[test]
     fn test_keywords() {
-        let input = "int void return";
-        let tokens = lex_c_code(input);
+        let input = "func return if";
+        let tokens = lex_yavanna_code(input);
         let expected = vec![
-            Token::Keyword("int".to_string()),
-            Token::Whitespace(" ".to_string()),
-            Token::Keyword("void".to_string()),
+            Token::Keyword("func".to_string()),
             Token::Whitespace(" ".to_string()),
             Token::Keyword("return".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Keyword("if".to_string()),
         ];
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
     }
@@ -123,7 +108,7 @@ mod lexer_tests {
     #[test]
     fn test_identifiers() {
         let input = "variable anotherVar _private";
-        let tokens = lex_c_code(input);
+        let tokens = lex_yavanna_code(input);
         let expected = vec![
             Token::Identifier("variable".to_string()),
             Token::Whitespace(" ".to_string()),
@@ -134,31 +119,43 @@ mod lexer_tests {
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
     }
 
-    // #[test]
-    // fn test_string_literals() {
-    //     let input = r#""Hello" "World""#;
-    //     let tokens = lex_c_code(input);
-    //     let expected = vec![
-    //         Token::StringLiteral("Hello".to_string()),
-    //         Token::Whitespace(" ".to_string()),
-    //         Token::StringLiteral("World".to_string())
-    //     ];
-    //     assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
-    // }
-
     #[test]
-    fn test_array_declaration() {
-        let input = "int arr[10];";
-        let tokens = lex_c_code(input);
+    fn test_string_literals() {
+        let input = r#""Hello" "World""#;
+        let tokens = lex_yavanna_code(input);
         let expected = vec![
-            Token::Keyword("int".to_string()),
+            Token::StringLiteral("\"Hello\"".to_string()),
             Token::Whitespace(" ".to_string()),
-            Token::Identifier("arr".to_string()),
-            Token::Punctuation("[".to_string()),
-            Token::Number("10".to_string()),
-            Token::Punctuation("]".to_string()),
-            Token::Punctuation(";".to_string()),
+            Token::StringLiteral("\"World\"".to_string())
         ];
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
     }
+
+    #[test]
+    fn test_function_declaration() {
+        let input = "func someFunction(x: int) -> int { }";
+        let tokens = lex_yavanna_code(input);
+        let expected = vec![
+            Token::Keyword("func".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Identifier("someFunction".to_string()),
+            Token::Punctuation("(".to_string()),
+            Token::Identifier("x".to_string()),
+            Token::Punctuation(":".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Type("int".to_string()),
+            Token::Punctuation(")".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Operator("->".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Type("int".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Punctuation("{".to_string()),
+            Token::Whitespace(" ".to_string()),
+            Token::Punctuation("}".to_string()),
+        ];
+        assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
+    }
+
 }
+
