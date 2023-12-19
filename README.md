@@ -8,7 +8,7 @@ and is named after [Yavanna](https://lotr.fandom.com/wiki/Yavanna) the Valar of 
 a tip of the hat to Dr. Richard Hipp's [lemon C parser](https://sqlite.org/src/doc/trunk/doc/lemon.html).
 
 <p align="center">
-  <img src="images/yavanna.png" width="350" alt="Yavanna">
+  <img src="images/yavanna.png" width="450" alt="Yavanna">
 </p>
 
 
