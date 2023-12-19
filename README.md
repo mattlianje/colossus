@@ -1,11 +1,14 @@
-# colossus
-A small, unoptimizing C compiler with a custom TAC IR targetting ARMv6-ish. 
-This library crate is mainly for self-study of the 
+# yavanna
+- A small, unoptimizing compiler for my synthetic language - `yavanna`. 
+It features a custom TAC IR targetting ARMv6-ish, LL(2) grammar and is described in EBNF.
+
+- This library crate is mainly for self-study of the 
 [Green Dragon Book](https://en.wikipedia.org/wiki/Principles_of_Compiler_Design), 
-and is named after [Colossus](https://en.wikipedia.org/wiki/Colossus_computer) in the spirit of building from the MOSFET up.
+and is named after [Yavanna](https://lotr.fandom.com/wiki/Yavanna) the Valar of fruits, as
+a tip of the hat to Dr. Richard Hipp's [lemon C parser](https://sqlite.org/src/doc/trunk/doc/lemon.html).
 
 <p align="center">
-  <img src="images/smaug.jpg" width="350" alt="Smaug">
+  <img src="images/yavanna.png" width="350" alt="Yavanna">
 </p>
 
 
