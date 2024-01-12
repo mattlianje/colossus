@@ -1,6 +1,6 @@
 # yavanna
 - A small, unoptimizing compiler for my synthetic language - `yavanna`. 
-It features a custom TAC IR targetting ARMv6-ish, LL(2) grammar and is described in EBNF.
+It targets ARMv6-ish, features LL(2) grammar and is described in EBNF.
 
 - This library crate is mainly for self-study of the 
 [Green Dragon Book](https://en.wikipedia.org/wiki/Principles_of_Compiler_Design), 
