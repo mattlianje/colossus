@@ -30,7 +30,7 @@ pub fn lex_yavanna_code(input: &str) -> VecDeque<Token> {
                 r"\bfor\b",
                 r"\belse\b",
             ]
-                .join("|"),
+            .join("|"),
             |s| Token::Keyword(s),
         ),
         // Type Keywords
@@ -42,7 +42,9 @@ pub fn lex_yavanna_code(input: &str) -> VecDeque<Token> {
         // String Literal
         (r#"\"(\\.|[^"\\])*\""#, |s| Token::StringLiteral(s)),
         // Operators
-        (r"\+|-|==|!=|>|<|>=|<=|&&|\|\||=|\+=", |s| Token::Operator(s)),
+        (r"\+|-|==|!=|>|<|>=|<=|&&|\|\||=|\+=", |s| {
+            Token::Operator(s)
+        }),
         // Return type arrow
         (r"->", |s| Token::Operator(s)),
         // Punctuation
@@ -56,7 +58,6 @@ pub fn lex_yavanna_code(input: &str) -> VecDeque<Token> {
         // Multi-line comment
         (r"/\*[\s\S]*?\*/", |s| Token::Comment(s)),
     ];
-
 
     let mut remaining = input;
 
@@ -85,7 +86,6 @@ pub fn lex_yavanna_code(input: &str) -> VecDeque<Token> {
 
     tokens
 }
-
 
 #[cfg(test)]
 mod lexer_tests {
@@ -126,7 +126,7 @@ mod lexer_tests {
         let expected = vec![
             Token::StringLiteral("\"Hello\"".to_string()),
             Token::Whitespace(" ".to_string()),
-            Token::StringLiteral("\"World\"".to_string())
+            Token::StringLiteral("\"World\"".to_string()),
         ];
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
     }
@@ -156,6 +156,4 @@ mod lexer_tests {
         ];
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
     }
-
 }
-
