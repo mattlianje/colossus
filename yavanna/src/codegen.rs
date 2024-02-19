@@ -6,34 +6,43 @@ impl CodeGenerator {
     pub fn generate(ast: &[AstNode]) -> String {
         let mut assembly_code = String::new();
         for node in ast {
-            assembly_code += &Self::generate_node(node); 
+            assembly_code += &Self::generate_node(node);
         }
         assembly_code
     }
 
     fn generate_node(node: &AstNode) -> String {
         match node {
-            AstNode::Function { name, params, body, .. } => {
+            AstNode::Function {
+                name, params, body, ..
+            } => {
                 let mut func_asm = format!(".global {}\n{}:\n", name, name);
                 for (index, param) in params.iter().enumerate() {
-                    func_asm += &format!("\t@ Parameter: {} {} in r{}\n", param.type_name, param.name, index);
+                    func_asm += &format!(
+                        "\t@ Parameter: {} {} in r{}\n",
+                        param.type_name, param.name, index
+                    );
                 }
                 for statement in body {
-                    func_asm += &Self::generate_node(statement); 
+                    func_asm += &Self::generate_node(statement);
                 }
                 func_asm += "\tbx lr\n";
                 func_asm
-            },
+            }
             AstNode::ReturnStatement { value } => {
                 let expr_asm = Self::generate_node(value);
                 format!("{}\tmov lr, pc\n\tpop {{pc}}\n", expr_asm)
-            },
+            }
             AstNode::Literal { value } => match value {
                 LiteralValue::Number(num) => format!("\tmov r0, #{}\n", num),
                 // TODO: Handle all literal types
                 _ => String::new(),
             },
-            AstNode::BinaryOperation { operator, left, right } => {
+            AstNode::BinaryOperation {
+                operator,
+                left,
+                right,
+            } => {
                 let lhs_asm = Self::generate_node(left);
                 let rhs_asm = Self::generate_node(right);
                 let op_asm = match operator {
@@ -43,11 +52,20 @@ impl CodeGenerator {
                     _ => "",
                 };
                 format!("{}{}{}", lhs_asm, rhs_asm, op_asm)
-            },
-            AstNode::VariableDeclaration { var_type, identifier, value } => {
-                let value_asm = value.as_ref().map_or(String::new(), |expr| Self::generate_node(expr));
-                format!("{}@ Declaring variable: {} of type {}\n", value_asm, identifier, var_type)
-            },
+            }
+            AstNode::VariableDeclaration {
+                var_type,
+                identifier,
+                value,
+            } => {
+                let value_asm = value
+                    .as_ref()
+                    .map_or(String::new(), |expr| Self::generate_node(expr));
+                format!(
+                    "{}@ Declaring variable: {} of type {}\n",
+                    value_asm, identifier, var_type
+                )
+            }
             // TODO: Handle all node types
             _ => String::new(),
         }
@@ -57,8 +75,8 @@ impl CodeGenerator {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::parser::{Parser};
-    use crate::lexer::{lex_yavanna_code};
+    use crate::lexer::lex_yavanna_code;
+    use crate::parser::Parser;
 
     #[test]
     fn test_code_generation() {
