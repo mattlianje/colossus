@@ -10,7 +10,7 @@ fn main() {
 }
 
 #[derive(Debug)]
-enum AstNode {
+pub enum AstNode {
     Function {
         name: String,
         params: Vec<Parameter>,
@@ -60,7 +60,7 @@ enum AstNode {
 }
 
 #[derive(Debug)]
-enum BinaryOperator {
+pub enum BinaryOperator {
     Add,
     Subtract,
     Multiply,
@@ -74,19 +74,19 @@ enum BinaryOperator {
 }
 
 #[derive(Debug)]
-enum LiteralValue {
+pub enum LiteralValue {
     Number(String),
     StringLiteral(String),
     // TODO : Finish this
 }
 
 #[derive(Debug)]
-struct Parameter {
-    name: String,
-    type_name: String,
+pub struct Parameter {
+    pub name: String,
+    pub type_name: String,
 }
 
-struct Parser {
+pub struct Parser {
     tokens: VecDeque<Token>,
     current_token: Option<Token>,
 }

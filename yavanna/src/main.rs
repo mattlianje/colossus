@@ -1,5 +1,6 @@
 mod lexer;
 mod parser;
+mod codegen;
 
 fn main() {
     let input = r#"
