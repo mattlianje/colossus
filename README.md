@@ -1,4 +1,20 @@
 # yavanna
+```
+/**
+  * Yavanna and her corresponding ARM-6
+  */
+func add(x: int, y: int) -> int {
+    return (x + y);
+}
+
+/*
+.global add
+add:
+    PUSH {lr}
+    ADD r0, r0, r1
+    POP {pc}
+*/
+```
 - A small, unoptimizing compiler for my synthetic language - `yavanna`. 
 It targets ARMv6-ish, features LL(2) grammar and is described in EBNF.
 
