@@ -134,7 +134,9 @@ mod lexer_tests {
     #[test]
     fn test_function_declaration() {
         let input = "func someFunction(x: int) -> int { }";
+        let input_2 = r#"func someFunction(x: int, y: int) -> int { return x + y; }"#;
         let tokens = lex_yavanna_code(input);
+        let tokens_2 = lex_yavanna_code(input_2);
         let expected = vec![
             Token::Keyword("func".to_string()),
             Token::Whitespace(" ".to_string()),
@@ -155,5 +157,6 @@ mod lexer_tests {
             Token::Punctuation("}".to_string()),
         ];
         assert_eq!(tokens.into_iter().collect::<Vec<_>>(), expected);
+        println!("TESTING{:?}", tokens_2.into_iter().collect::<Vec<_>>());
     }
 }
