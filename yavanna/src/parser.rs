@@ -256,7 +256,7 @@ impl Parser {
                         left: Box::new(left_expr),
                         right: Box::new(right_expr),
                     };
-                },
+                }
                 // Break the loop if the current token is not an operator
                 _ => break,
             }
@@ -266,35 +266,38 @@ impl Parser {
     }
 
     // Helper method for parsing primary expressions: numbers, identifiers, parentheses.
-    // TODO: Finish 
+    // TODO: Finish
     fn parse_primary_expression(&mut self) -> AstNode {
         match &self.current_token {
             Some(Token::Identifier(ident)) => {
                 let expr = AstNode::Identifier(ident.clone());
-                self.advance(); 
+                self.advance();
                 expr
-            },
+            }
             Some(Token::Number(num)) => {
                 let expr = AstNode::Literal {
                     value: LiteralValue::Number(num.clone()),
                 };
                 self.advance();
                 expr
-            },
+            }
             Some(Token::StringLiteral(str_lit)) => {
                 let expr = AstNode::Literal {
                     value: LiteralValue::StringLiteral(str_lit.clone()),
                 };
-                self.advance(); 
+                self.advance();
                 expr
-            },
+            }
             Some(Token::Punctuation(punct)) if punct == "(" => {
                 self.advance(); // Consume '('
                 let expr = self.parse_expression(); // Recursive call to handle nested expressions
                 self.expect_punctuation(")"); // Consume ')'
                 expr
-            },
-            _ => panic!("Unexpected token when expecting a primary expression: {:?}", self.current_token),
+            }
+            _ => panic!(
+                "Unexpected token when expecting a primary expression: {:?}",
+                self.current_token
+            ),
         }
     }
 
@@ -490,7 +493,7 @@ mod tests {
         let input = r#"func someFunction(x: int, y: int) -> int { return x; }"#;
         validate_function_parsing(input, "someFunction", 2, Some("int"));
 
-         // No params 
+        // No params
         let input = r#"func noParamsFunction() -> int { return 9; }"#;
         validate_function_parsing(input, "noParamsFunction", 0, Some("int"));
     }
