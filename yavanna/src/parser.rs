@@ -244,6 +244,30 @@ impl Parser {
     }
 
     fn parse_expression(&mut self) -> AstNode {
+        let mut left_expr = self.parse_primary_expression();
+
+        while let Some(token) = &self.current_token {
+            match token {
+                Token::Operator(_) => {
+                    let op = self.parse_operator();
+                    let right_expr = self.parse_primary_expression();
+                    left_expr = AstNode::BinaryOperation {
+                        operator: op,
+                        left: Box::new(left_expr),
+                        right: Box::new(right_expr),
+                    };
+                }
+                // Break the loop if the current token is not an operator
+                _ => break,
+            }
+        }
+
+        left_expr
+    }
+
+    // Helper method for parsing primary expressions: numbers, identifiers, parentheses.
+    // TODO: Finish
+    fn parse_primary_expression(&mut self) -> AstNode {
         match &self.current_token {
             Some(Token::Identifier(ident)) => {
                 let expr = AstNode::Identifier(ident.clone());
@@ -264,12 +288,16 @@ impl Parser {
                 self.advance();
                 expr
             }
-            _ => {
-                panic!(
-                    "Unsupported or unexpected expression type: {:?}",
-                    self.current_token
-                );
+            Some(Token::Punctuation(punct)) if punct == "(" => {
+                self.advance(); // Consume '('
+                let expr = self.parse_expression(); // Recursive call to handle nested expressions
+                self.expect_punctuation(")"); // Consume ')'
+                expr
             }
+            _ => panic!(
+                "Unexpected token when expecting a primary expression: {:?}",
+                self.current_token
+            ),
         }
     }
 
@@ -465,24 +493,9 @@ mod tests {
         let input = r#"func someFunction(x: int, y: int) -> int { return x; }"#;
         validate_function_parsing(input, "someFunction", 2, Some("int"));
 
-        // No params + no return type
-        //let input = r#"func noParamsFunction() { var a: int = 9; }"#;
-        //validate_function_parsing(input, "noParamsFunction", 0, None);
-
-        // Multiple params and trickier body
-        //let input = r#"func complexFunction(a: float, b: float, c: int) -> float { if a > b { return a; } else { return b; } }"#;
-        //validate_function_parsing(input, "complexFunction", 3, Some("float"));
-
-        // Boolean logic
-        //let input = r#"func boolLogic(x: int, y: int) -> bool { return x > y && x != 0; }"#;
-        //validate_function_parsing(input, "boolLogic", 2, Some("bool"));
-
-        // TODO: Add panic test for invalid syntax
-        //let input = r#"func missingBrace(x: int, y: int) -> int { return x - y; "#;
-
-        // Nested control structures
-        //let input = r#"func nestedControl(a: int) -> int { if a > 0 { while a < 10 { a = a + 1; } } return a; }"#;
-        //validate_function_parsing(input, "nestedControl", 1, Some("int"));
+        // No params
+        let input = r#"func noParamsFunction() -> int { return 9; }"#;
+        validate_function_parsing(input, "noParamsFunction", 0, Some("int"));
     }
 
     fn validate_function_parsing(
@@ -509,23 +522,4 @@ mod tests {
             panic!("Expected a function definition");
         }
     }
-
-    // #[test]
-    // fn test_complex_multiline_code() {
-    //     let input = r#"
-    //     func calculate(x: int, y: int) -> int {
-    //         var result: int;
-    //         if x > y {
-    //             result = x - y;
-    //         } else {
-    //             result = y - x;
-    //         }
-    //         return result;
-    //     }
-    //     "#;
-    //     let mut parser = setup_parser(input);
-    //     let ast = parser.parse();
-
-    //     assert_eq!(ast.len(), 1);
-    // }
 }
